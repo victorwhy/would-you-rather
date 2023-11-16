@@ -4,14 +4,14 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function seed() {
-  const email = "rachel@remix.run";
+  const email = "lunacraz@gmail.com";
 
   // cleanup the existing database
   await prisma.user.delete({ where: { email } }).catch(() => {
     // no worries if it doesn't exist yet
   });
 
-  const hashedPassword = await bcrypt.hash("racheliscool", 10);
+  const hashedPassword = await bcrypt.hash("lunacraz123", 10);
 
   const user = await prisma.user.create({
     data: {
@@ -24,19 +24,25 @@ async function seed() {
     },
   });
 
-  await prisma.note.create({
+  const topic = await prisma.topic.create({
     data: {
-      title: "My first note",
-      body: "Hello, world!",
-      userId: user.id,
+      title: "Regeneration or Healing",
+      description: "Regeneration allows you to perfectly heal only yourself of every wound, disease, missing limb, etc. which makes you immortal. Healing allows you to heal yourself and others of almost all wounds, but you can't regenerate your own or someone else's limbs, head, etc.",
+      authorId: user.id,
     },
   });
 
-  await prisma.note.create({
+  await prisma.choice.create({
     data: {
-      title: "My second note",
-      body: "Hello, world!",
-      userId: user.id,
+      body: "have Regeneration",
+      topicId: topic.id,
+    },
+  });
+
+  await prisma.choice.create({
+    data: {
+      body: "have Healing",
+      topicId: topic.id,
     },
   });
 
