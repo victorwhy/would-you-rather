@@ -2,7 +2,7 @@
 CREATE TABLE "Topic" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "votes" BIGINT NOT NULL,
+    "votes" INTEGER NOT NULL DEFAULT 0,
     "description" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE "Topic" (
 CREATE TABLE "Choice" (
     "id" SERIAL NOT NULL,
     "body" TEXT NOT NULL,
-    "votes" BIGINT NOT NULL,
+    "votes" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "topicId" TEXT NOT NULL,

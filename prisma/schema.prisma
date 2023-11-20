@@ -41,7 +41,7 @@ model Note {
 model Topic {
   id    String @id @default(cuid())
   title String
-  votes BigInt       @default(0)
+  votes Int       @default(0)
   description String @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -55,7 +55,7 @@ model Topic {
 model Choice {
   id    Int @id @default(autoincrement())
   body  String
-  votes BigInt       @default(0)
+  votes Int       @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -6,7 +6,7 @@ export type { Topic } from "@prisma/client";
 
 export function getTopics() {
   return prisma.topic.findMany({
-    select: { id: true, title: true },
+    select: { id: true, title: true, votes: true },
     orderBy: { createdAt: "desc" },
   });
 }
