@@ -74,3 +74,9 @@ export function useUser(): User {
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
 }
+
+export function calculatePercentage(numerator: number, denominator:number): string {
+  if (denominator === 0) return "0%";
+
+  return `${numerator / denominator * 100}%`
+}
