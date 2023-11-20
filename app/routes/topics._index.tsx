@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
+import { UpvoteArrow } from "~/images/Upvote";
 import { getTopics } from "~/models/topic.server";
 
 interface TopicItem {
@@ -16,8 +17,11 @@ export const loader = async () => {
 
 const TopicItem = ({ id, title, votes }: TopicItem) => {
   return (
-    <div>
-      <div>
+    <div className="flex flex-row p-3 border border-solid border-slate-200">
+      <div className="flex">
+        <button>
+          <UpvoteArrow />
+        </button>
         <p>{Number(votes)}</p>
       </div>
       <Link to={id}>
