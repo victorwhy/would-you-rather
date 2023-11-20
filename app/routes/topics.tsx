@@ -16,30 +16,30 @@ export default function NotesPage() {
   return (
     <div className="flex h-full min-h-screen flex-col">
       <header className="flex items-center justify-between bg-slate-800 p-4 text-white">
-        {user ? <p>hello</p> : null}
+      {
+        user ? (
+        <Link to="new" className="block p-4 text-xl text-blue-500">
+          + New Topic
+        </Link>
+        ) : (
+        <Link to="new" className="block p-4 text-xl text-blue-500">
+          Log in
+        </Link>
+        )
+      }
       </header>
 
       <main className="flex h-full bg-white">
         <div className="h-full w-80 border-r bg-gray-50">
-          {
-            user ? (
-              <Link to="new" className="block p-4 text-xl text-blue-500">
-              + New Topic
-            </Link>
-            ) : null
-          }
-
-          <hr />
-
           <ol>
-              {data.topics.map((topic) => (
-                <li key={topic.id}>
-                  <Link to={topic.id}>
-                    {topic.title}
-                  </Link>
-                </li>
-              ))}
-            </ol>
+            {data.topics.map((topic) => (
+              <li key={topic.id}>
+                <Link to={topic.id}>
+                  {topic.title}
+                </Link>
+              </li>
+            ))}
+          </ol>
         </div>
 
         <div className="flex-1 p-6">
