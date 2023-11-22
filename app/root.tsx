@@ -11,9 +11,11 @@ import {
 } from "@remix-run/react";
 
 import { getUser } from "~/session.server";
-import stylesheet from "~/tailwind.css";
+import stylesheet from "~/stylesheet.css";
+import tailwindstyles from "~/tailwind.css";
 
 export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: tailwindstyles },
   { rel: "stylesheet", href: stylesheet },
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];

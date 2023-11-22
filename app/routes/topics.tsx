@@ -10,15 +10,15 @@ export default function NotesPage() {
       <header className="flex items-center justify-between bg-slate-800 p-4 text-white">
       {
         user ? (
-        <Link to="new" className="block p-4 text-xl text-blue-500">
+        <Link to="new" className="block p-1 text-xl text-blue-500">
           + New Topic
         </Link>
         ) : (
         <>
-          <Link to="new" className="block p-4 text-xl text-blue-500">
+          <Link to="new" className="block p-1 text-xl text-blue-500">
             + New Topic
           </Link>
-          <Link to="new" className="block p-4 text-xl text-blue-500">
+          <Link to="new" className="block p-1 text-xl text-blue-500">
             Log in
           </Link>
         </>

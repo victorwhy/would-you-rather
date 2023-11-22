@@ -183,7 +183,7 @@ export default function NewTopicPage() {
         <div className="w-full">
           <button
             type="submit"
-            className="bg-black px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400"
+            className="bg-black px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
           >
             Save
           </button>

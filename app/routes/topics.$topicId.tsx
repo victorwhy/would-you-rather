@@ -26,12 +26,17 @@ export default function TopicPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl text-center font-bold py-5">{data.topic.title}?</h1>
-      <div className="flex flex-col md:flex-row w-full h-full text-2xl">
-        <button className="bg-black basis-1/2 p-5">
+      <h1 className="text-2xl text-center font-bold px-2 py-5">{data.topic.title}?</h1>
+      {
+        data.topic.description ? (
+          <p className="text-center px-3 pt-0 pb-5 max-w-lg mx-auto">{data.topic.description}</p>
+        ) : null
+      }
+      <div className="choices-container flex flex-col md:flex-row w-full h-full text-2xl">
+        <button className="bg-black basis-1/2 p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all">
           <p className="text-white">{choice1.body}</p>
         </button>
-        <button className="bg-white basis-1/2 p-5">
+        <button className="bg-white basis-1/2 p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all">
           <p>{choice2.body}</p>
         </button>
       </div>
