@@ -11,20 +11,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const formData = await request.formData();
   const title = formData.get("title");
-  const description = formData.get("title");
+  const description = formData.get("description") as string | null;
   const choice1 = formData.get("choice1");
   const choice2 = formData.get("choice2");
 
   if (typeof title !== "string" || title.length === 0) {
     return json(
       { errors: { title: "Title is required", description: null, choice1: null, choice2: null } },
-      { status: 400 },
-    );
-  }
-
-  if (typeof description !== "string" || description.length === 0) {
-    return json(
-      { errors: { title: null, description: "Description is required", choice1: null, choice2: null } },
       { status: 400 },
     );
   }
@@ -39,13 +32,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (typeof choice2 !== "string" || choice2.length === 0) {
     return json(
       { errors: { title: null, choice2: "Choice 2 is required", choice1: null, description: null } },
-      { status: 400 },
-    );
-  }
-
-  if (typeof description !== "string" || description.length === 0) {
-    return json(
-      { errors: { title: null, choice1: null, description: null, choice2: "Choice 2 is required" } },
       { status: 400 },
     );
   }
@@ -89,22 +75,10 @@ export default function NewTopicPage() {
     <div className="w-full p-4 max-w-md mx-auto">
       <div className="flex flex-col gap-2">
         <div>
-          <p>
-            Your title and descriptions give the user background / restrictions on the question.
-          </p>
-          <p>
-            Your choices should be in the format of <br />
-          </p>
-          <code
-            className="text-xs inline-flex text-left items-center space-x-4 bg-gray-800 text-yellow-500 rounded-lg p-4">
-            {` <verb> `} - subject {` (it could be more than word!) `}
-          </code>
-        </div>
-        <div>
-          <p>
+          <h1 className="text-xl font-bold">
             Would you rather... 
-          </p>
-          <div className="mt-2">
+          </h1>
+          <div className="mt-2 font-bold">
             <p className="text-lg">
               {choice1 ? `${choice1}?` : (<span className="opacity-50">{CHOICE1_PLACEHOLDER}?</span>)}
             </p>
@@ -132,7 +106,7 @@ export default function NewTopicPage() {
             <input
               ref={titleRef}
               name="title"
-              placeholder="Eat Red or White Pasta?"
+              placeholder="Red or White Pasta?"
               className="flex-1 border-2 border-black px-3 text-lg leading-loose"
               aria-invalid={actionData?.errors?.title ? true : undefined}
               aria-errormessage={
@@ -143,28 +117,6 @@ export default function NewTopicPage() {
           {actionData?.errors?.title ? (
             <div className="pt-1 text-red-700" id="title-error">
               {actionData.errors.title}
-            </div>
-          ) : null}
-        </div>
-
-        <div>
-          <label className="flex w-full flex-col gap-1">
-            <span>Description: </span>
-            <textarea
-              ref={descriptionRef}
-              name="description"
-              placeholder="Give a little context here... red - tomato, white - butter/cream!"
-              rows={4}
-              className="w-full flex-1 border-2 border-black px-3 py-2 text-lg leading-6"
-              aria-invalid={actionData?.errors?.description ? true : undefined}
-              aria-errormessage={
-                actionData?.errors?.description ? "description-error" : undefined
-              }
-            />
-          </label>
-          {actionData?.errors?.description ? (
-            <div className="pt-1 text-red-700" id="description-error">
-              {actionData.errors.description}
             </div>
           ) : null}
         </div>
@@ -213,6 +165,19 @@ export default function NewTopicPage() {
               {actionData.errors.choice2}
             </div>
           ) : null}
+        </div>
+
+        <div>
+          <label className="flex w-full flex-col gap-1">
+            <span>Description: </span>
+            <textarea
+              ref={descriptionRef}
+              name="description"
+              placeholder="(Optional) Give a little context here... red - tomato, white - butter/cream!"
+              rows={4}
+              className="w-full flex-1 border-2 border-black px-3 py-2 text-lg leading-6"
+            />
+          </label>
         </div>
 
         <div className="w-full">

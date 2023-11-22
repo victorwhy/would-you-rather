@@ -80,3 +80,7 @@ export function calculatePercentage(numerator: number, denominator:number): stri
 
   return `${numerator / denominator * 100}%`
 }
+
+export function cleanTrailingQuestion(string: string): string {
+  return string.replace(/\?+$/g, "");
+}

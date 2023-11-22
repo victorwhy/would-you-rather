@@ -1,12 +1,20 @@
 import type { Topic, User, Choice } from "@prisma/client";
 
 import { prisma } from "~/db.server";
+import { cleanTrailingQuestion } from "~/utils";
 
 export type { Topic } from "@prisma/client";
 
+export function getTopic({ id }: Pick<Topic, "id">) {
+  return prisma.topic.findFirst({
+    select: { id: true, description: true, title: true, choices: true },
+    where: { id },
+  });
+}
+
 export function getTopics() {
   return prisma.topic.findMany({
-    select: { id: true, title: true, votes: true, choices: true },
+    select: { id: true, title: true, choices: true },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -26,7 +34,7 @@ export async function createTopic({
 }) {
   const topic = await prisma.topic.create({
     data: {
-      title,
+      title: cleanTrailingQuestion(title),
       description,
       authorId: userId,
     },
@@ -34,14 +42,14 @@ export async function createTopic({
 
   await prisma.choice.create({
     data: {
-      body: choice1,
+      body: cleanTrailingQuestion(choice1),
       topicId: topic.id,
     },
   });
 
   await prisma.choice.create({
     data: {
-      body: choice2,
+      body: cleanTrailingQuestion(choice2),
       topicId: topic.id,
     },
   });
