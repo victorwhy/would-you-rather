@@ -1,7 +1,6 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
-import { UpvoteArrow } from "~/images/Upvote";
 import { getTopics } from "~/models/topic.server";
 import { calculatePercentage } from "~/utils";
 
@@ -29,9 +28,6 @@ const TopicItem = ({ id, title, choices }: TopicItem) => {
   return (
     <div className="flex flex-row p-3 border border-solid border-slate-200 w-full">
       <div className="flex">
-        <button>
-          <UpvoteArrow />
-        </button>
         <p>{totalVotes}</p>
       </div>
       <Link to={id}>

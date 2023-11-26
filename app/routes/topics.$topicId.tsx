@@ -6,12 +6,12 @@ import {
   useRouteError,
   useFetcher,
 } from "@remix-run/react";
-import { useState } from "react";
 import invariant from "tiny-invariant";
 
 import { incrementChoice } from "~/models/choice.server";
 import { getTopic } from "~/models/topic.server";
-import { getSession, addChoiceToSession, getChoicesFromSession } from "~/session.server";
+import { addChoiceToSession, getChoicesFromSession } from "~/session.server";
+import { calculatePercentage } from "~/utils";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
@@ -38,8 +38,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 
   console.log("submitted ChoiceId", choiceId);
 
-  const cookie = await addChoiceToSession(request, parseInt(choiceId));
   const choice = await incrementChoice({ id: parseInt(choiceId) });
+  const cookie = await addChoiceToSession(request, parseInt(choiceId));
 
   return json(
     { choice },
@@ -57,9 +57,10 @@ export default function TopicPage() {
   const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
   const choice1 = sortedChoices[0];
   const choice2 = sortedChoices[1];
-  const choice1HasSubmitted = data.sessionChoices.includes(choice1.id);
-  const choice2HasSubmitted = data.sessionChoices.includes(choice2.id)
-  const hasSubmitted = choice1HasSubmitted || choice2HasSubmitted;
+  const choice1Picked = data.sessionChoices.includes(choice1.id);
+  const choice2Picked = data.sessionChoices.includes(choice2.id)
+  const hasSubmitted = choice1Picked || choice2Picked;
+  const totalVotes = choice1.votes + choice2.votes;
 
   return (
     <div className="w-full">
@@ -79,7 +80,8 @@ export default function TopicPage() {
           name="choiceId"
           disabled={hasSubmitted}
         >
-          <p className="text-white">{choice1.body}</p>
+          <p className="text-white">{choice1.body} {choice1Picked ? " picked" : null}</p>
+          <p className={`text-white ${hasSubmitted ? "" : " hidden"}`}>{calculatePercentage(choice1.votes, totalVotes)}</p>
         </button>
         <button
           className="bg-white basis-1/2 p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all"
@@ -87,7 +89,8 @@ export default function TopicPage() {
           name="choiceId"
           disabled={hasSubmitted}
         >
-          <p>{choice2.body}</p>
+          <p>{choice2.body}  {choice2Picked ? " picked" : null}</p>
+          <p className={`${hasSubmitted ? "" : "hidden"}`}>{calculatePercentage(choice2.votes, totalVotes)}</p>
         </button>
       </fetcher.Form>
     </div>

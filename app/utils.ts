@@ -78,7 +78,7 @@ export function validateEmail(email: unknown): email is string {
 export function calculatePercentage(numerator: number, denominator:number): string {
   if (denominator === 0) return "0%";
 
-  return `${numerator / denominator * 100}%`
+  return `${Math.round(numerator / denominator * 100)}%`
 }
 
 export function cleanTrailingQuestion(string: string): string {

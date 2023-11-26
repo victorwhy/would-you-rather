@@ -100,14 +100,12 @@ export async function logout(request: Request) {
 export async function getChoicesFromSession(request: Request): Promise<number[]> {
   const session = await getSession(request);
   if (!session.has(CHOICE_KEY)) return [];
-  console.log("getter", session.get(CHOICE_KEY));
   return session.get(CHOICE_KEY);
 }
 
 export async function addChoiceToSession(request: Request, choiceId: number) {
   const cookie = request.headers.get("Cookie");
   const session = await sessionStorage.getSession(cookie);
-  console.log(session.get(CHOICE_KEY));
   if (session.has(CHOICE_KEY) && !session.get(CHOICE_KEY).includes(choiceId)) {
     const currentChoices = session.get(CHOICE_KEY);
     currentChoices.push(choiceId);
