@@ -1,10 +1,10 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
+  Form,
   isRouteErrorResponse,
   useLoaderData,
   useRouteError,
-  useFetcher,
 } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
@@ -12,6 +12,11 @@ import { incrementChoice } from "~/models/choice.server";
 import { getTopic } from "~/models/topic.server";
 import { addChoiceToSession, getChoicesFromSession } from "~/session.server";
 import { calculatePercentage } from "~/utils";
+
+enum FormTypes {
+  TOPIC_FORM = "choiceId",
+  COMMENT_FORM = "comment"
+}
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
@@ -28,6 +33,9 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
 
   const formData = await request.formData();
+  for (const foo of formData.entries()) {
+    console.log(foo);
+  }
   const choiceId = formData.get("choiceId");
 
   if (typeof choiceId !== "string" || choiceId.length === 0) {
@@ -35,8 +43,6 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       { status: 400 },
     );
   }
-
-  console.log("submitted ChoiceId", choiceId);
 
   const choice = await incrementChoice({ id: parseInt(choiceId) });
   const cookie = await addChoiceToSession(request, parseInt(choiceId));
@@ -52,7 +58,6 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 };
 
 export default function TopicPage() {
-  const fetcher = useFetcher();
   const data = useLoaderData<typeof loader>();
   const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
   const choice1 = sortedChoices[0];
@@ -70,7 +75,7 @@ export default function TopicPage() {
           <p className="text-center px-3 pt-0 pb-5 max-w-lg mx-auto">{data.topic.description}</p>
         ) : null
       }
-      <fetcher.Form
+      <Form
         className="choices-container flex flex-col md:flex-row w-full h-full text-2xl"
         method="post"
       >
@@ -92,7 +97,24 @@ export default function TopicPage() {
           <p>{choice2.body}  {choice2Picked ? " picked" : null}</p>
           <p className={`${hasSubmitted ? "" : "hidden"}`}>{calculatePercentage(choice2.votes, totalVotes)}</p>
         </button>
-      </fetcher.Form>
+      </Form>
+      <Form
+        className="p-3"
+        method="post"
+      >
+        <p>Comments</p>
+        <textarea
+          className="block border-2 border-black px-3 text-sm w-full md:w-2/3 h-20 leading-loose"
+          name={FormTypes.COMMENT_FORM}
+          placeholder="Reply"
+        />
+        <button
+          className="bg-black mt-3 px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
+          name={FormTypes.COMMENT_FORM}
+        >
+          Post
+        </button>
+      </Form>
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function Menu({ isOpen, user, setClose }: Menu) {
         user ? (
           <>
           <Link
-            to="/new" className="block p-2 text-xl text-black"
+            to="/topics/new" className="block p-2 text-xl text-black"
             onClick={setClose}
           >
             New Topic
@@ -38,7 +38,7 @@ export default function Menu({ isOpen, user, setClose }: Menu) {
         ) : (
           <>
             <Link
-              to="/new" className="block p-2 text-xl text-black"
+              to="/topics/new" className="block p-2 text-xl text-black"
               onClick={setClose}
             >
               New Topic
