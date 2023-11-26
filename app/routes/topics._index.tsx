@@ -13,7 +13,6 @@ interface Choice {
 interface TopicItem {
   id: string;
   title: string;
-  votes: number;
   choices: Choice[];
 }
 
@@ -22,7 +21,7 @@ export const loader = async () => {
   return json({ topics });
 };
 
-const TopicItem = ({ id, title, votes, choices }: TopicItem) => {
+const TopicItem = ({ id, title, choices }: TopicItem) => {
   const choice1 = choices[0];
   const choice2 = choices[1];
   const totalVotes = choice1.votes + choice2.votes;
@@ -33,7 +32,7 @@ const TopicItem = ({ id, title, votes, choices }: TopicItem) => {
         <button>
           <UpvoteArrow />
         </button>
-        <p>{Number(votes)}</p>
+        <p>{totalVotes}</p>
       </div>
       <Link to={id}>
         <div className="flex flex-row">
@@ -73,7 +72,6 @@ export default function TopicIndexPage() {
             <TopicItem
               id={topic.id}
               title={topic.title}
-              votes={topic.votes}
               choices={topic.choices}
             />
           </li>

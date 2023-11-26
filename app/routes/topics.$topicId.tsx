@@ -1,28 +1,65 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   useLoaderData,
   useRouteError,
+  useFetcher,
 } from "@remix-run/react";
+import { useState } from "react";
 import invariant from "tiny-invariant";
 
+import { incrementChoice } from "~/models/choice.server";
 import { getTopic } from "~/models/topic.server";
+import { getSession, addChoiceToSession, getChoicesFromSession } from "~/session.server";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
+  const sessionChoices = await getChoicesFromSession(request);
 
   const topic = await getTopic({ id: params.topicId });
   if (!topic) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ topic });
+  return json({ topic, sessionChoices });
+};
+
+export const action = async ({ params, request }: ActionFunctionArgs) => {
+  invariant(params.topicId, "topicId not found");
+
+  const formData = await request.formData();
+  const choiceId = formData.get("choiceId");
+
+  if (typeof choiceId !== "string" || choiceId.length === 0) {
+    return json(
+      { status: 400 },
+    );
+  }
+
+  console.log("submitted ChoiceId", choiceId);
+
+  const cookie = await addChoiceToSession(request, parseInt(choiceId));
+  const choice = await incrementChoice({ id: parseInt(choiceId) });
+
+  return json(
+    { choice },
+    {
+      headers: {
+        "Set-Cookie": cookie,
+      },
+    }
+  );
 };
 
 export default function TopicPage() {
+  const fetcher = useFetcher();
   const data = useLoaderData<typeof loader>();
-  const choice1 = data.topic.choices[0];
-  const choice2 = data.topic.choices[1];
+  const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
+  const choice1 = sortedChoices[0];
+  const choice2 = sortedChoices[1];
+  const choice1HasSubmitted = data.sessionChoices.includes(choice1.id);
+  const choice2HasSubmitted = data.sessionChoices.includes(choice2.id)
+  const hasSubmitted = choice1HasSubmitted || choice2HasSubmitted;
 
   return (
     <div className="w-full">
@@ -32,14 +69,27 @@ export default function TopicPage() {
           <p className="text-center px-3 pt-0 pb-5 max-w-lg mx-auto">{data.topic.description}</p>
         ) : null
       }
-      <div className="choices-container flex flex-col md:flex-row w-full h-full text-2xl">
-        <button className="bg-black basis-1/2 p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all">
+      <fetcher.Form
+        className="choices-container flex flex-col md:flex-row w-full h-full text-2xl"
+        method="post"
+      >
+        <button
+          className="bg-black basis-1/2 p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all"
+          value={choice1.id}
+          name="choiceId"
+          disabled={hasSubmitted}
+        >
           <p className="text-white">{choice1.body}</p>
         </button>
-        <button className="bg-white basis-1/2 p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all">
+        <button
+          className="bg-white basis-1/2 p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all"
+          value={choice2.id}
+          name="choiceId"
+          disabled={hasSubmitted}
+        >
           <p>{choice2.body}</p>
         </button>
-      </div>
+      </fetcher.Form>
     </div>
   );
 }

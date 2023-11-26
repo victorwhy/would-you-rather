@@ -18,6 +18,7 @@ export const sessionStorage = createCookieSessionStorage({
 });
 
 const USER_SESSION_KEY = "userId";
+const CHOICE_KEY = "choices";
 
 export async function getSession(request: Request) {
   const cookie = request.headers.get("Cookie");
@@ -94,4 +95,26 @@ export async function logout(request: Request) {
       "Set-Cookie": await sessionStorage.destroySession(session),
     },
   });
+}
+
+export async function getChoicesFromSession(request: Request): Promise<number[]> {
+  const session = await getSession(request);
+  if (!session.has(CHOICE_KEY)) return [];
+  console.log("getter", session.get(CHOICE_KEY));
+  return session.get(CHOICE_KEY);
+}
+
+export async function addChoiceToSession(request: Request, choiceId: number) {
+  const cookie = request.headers.get("Cookie");
+  const session = await sessionStorage.getSession(cookie);
+  console.log(session.get(CHOICE_KEY));
+  if (session.has(CHOICE_KEY) && !session.get(CHOICE_KEY).includes(choiceId)) {
+    const currentChoices = session.get(CHOICE_KEY);
+    currentChoices.push(choiceId);
+    session.set(CHOICE_KEY, currentChoices);
+  } else {
+    session.set(CHOICE_KEY, [choiceId]);
+  }
+
+  return sessionStorage.commitSession(session);
 }
