@@ -5,7 +5,7 @@ import { cleanTrailingQuestion } from "~/utils";
 
 export type { Topic } from "@prisma/client";
 
-export function getTopic({ id }: Pick<Topic, "id">) {
+export function getTopic(id: Topic["id"]) {
   return prisma.topic.findFirst({
     select: { id: true, description: true, title: true, choices: true },
     where: { id },

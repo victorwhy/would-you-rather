@@ -1,5 +1,4 @@
-import { Outlet } from "@remix-run/react";
-import { Link } from "@remix-run/react";
+import { Link, Outlet } from "@remix-run/react";
 import { useState } from "react";
 
 import Menu from "~/components/Menu";

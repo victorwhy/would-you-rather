@@ -14,7 +14,7 @@ import { addChoiceToSession, getChoicesFromSession } from "~/session.server";
 import { calculatePercentage } from "~/utils";
 
 enum FormTypes {
-  TOPIC_FORM = "choiceId",
+  TOPIC_FORM = "choice",
   COMMENT_FORM = "comment"
 }
 
@@ -22,7 +22,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
   const sessionChoices = await getChoicesFromSession(request);
 
-  const topic = await getTopic({ id: params.topicId });
+  const topic = await getTopic(params.topicId);
   if (!topic) {
     throw new Response("Not Found", { status: 404 });
   }
@@ -33,28 +33,37 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
 
   const formData = await request.formData();
-  for (const foo of formData.entries()) {
-    console.log(foo);
-  }
-  const choiceId = formData.get("choiceId");
+  const formName = formData.get("formName");
 
-  if (typeof choiceId !== "string" || choiceId.length === 0) {
-    return json(
-      { status: 400 },
-    );
-  }
+  switch (formName) {
+    case FormTypes.TOPIC_FORM: {
+      const choiceId = formData.get("choiceId");
 
-  const choice = await incrementChoice({ id: parseInt(choiceId) });
-  const cookie = await addChoiceToSession(request, parseInt(choiceId));
+      if (typeof choiceId !== "string" || choiceId.length === 0) {
+        return json(
+          { status: 400 },
+        );
+      }
 
-  return json(
-    { choice },
-    {
-      headers: {
-        "Set-Cookie": cookie,
-      },
+      const choice = await incrementChoice(parseInt(choiceId));
+      const cookie = await addChoiceToSession(request, parseInt(choiceId));
+
+      return json(
+        { choice },
+        {
+          headers: {
+            "Set-Cookie": cookie,
+          },
+        }
+      );
     }
-  );
+    case FormTypes.COMMENT_FORM: {
+      const commentBody = formData.get("commentBody");
+      console.log(commentBody);
+
+      return null;
+    }
+  }
 };
 
 export default function TopicPage() {
@@ -75,29 +84,32 @@ export default function TopicPage() {
           <p className="text-center px-3 pt-0 pb-5 max-w-lg mx-auto">{data.topic.description}</p>
         ) : null
       }
-      <Form
-        className="choices-container flex flex-col md:flex-row w-full h-full text-2xl"
-        method="post"
-      >
-        <button
-          className="bg-black basis-1/2 p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all"
-          value={choice1.id}
-          name="choiceId"
-          disabled={hasSubmitted}
-        >
-          <p className="text-white">{choice1.body} {choice1Picked ? " picked" : null}</p>
-          <p className={`text-white ${hasSubmitted ? "" : " hidden"}`}>{calculatePercentage(choice1.votes, totalVotes)}</p>
-        </button>
-        <button
-          className="bg-white basis-1/2 p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all"
-          value={choice2.id}
-          name="choiceId"
-          disabled={hasSubmitted}
-        >
-          <p>{choice2.body}  {choice2Picked ? " picked" : null}</p>
-          <p className={`${hasSubmitted ? "" : "hidden"}`}>{calculatePercentage(choice2.votes, totalVotes)}</p>
-        </button>
-      </Form>
+      <div className="choices-container flex flex-col md:flex-row w-full h-full text-2xl">
+        <Form method="post" className="bg-black basis-1/2">
+          <input value={choice1.id} name="choiceId" hidden />
+          <button
+            className="w-full h-full p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all"
+            value={FormTypes.TOPIC_FORM}
+            name="formName"
+            disabled={hasSubmitted}
+          >
+            <p className="text-white">{choice1.body} {choice1Picked ? " picked" : null}</p>
+            <p className={`text-white ${hasSubmitted ? "" : " hidden"}`}>{calculatePercentage(choice1.votes, totalVotes)}</p>
+          </button>
+        </Form>
+        <Form method="post" className="bg-white basis-1/2">
+          <input value={choice2.id} name="choiceId" hidden />
+          <button
+            className="w-full h-full p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all"
+            value={FormTypes.TOPIC_FORM}
+            name="formName"
+            disabled={hasSubmitted}
+          >
+            <p>{choice2.body}  {choice2Picked ? " picked" : null}</p>
+            <p className={`${hasSubmitted ? "" : "hidden"}`}>{calculatePercentage(choice2.votes, totalVotes)}</p>
+          </button>
+        </Form>
+      </div>
       <Form
         className="p-3"
         method="post"
@@ -105,12 +117,13 @@ export default function TopicPage() {
         <p>Comments</p>
         <textarea
           className="block border-2 border-black px-3 text-sm w-full md:w-2/3 h-20 leading-loose"
-          name={FormTypes.COMMENT_FORM}
+          name="commentBody"
           placeholder="Reply"
         />
         <button
           className="bg-black mt-3 px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
-          name={FormTypes.COMMENT_FORM}
+          name="formName"
+          value={FormTypes.COMMENT_FORM}
         >
           Post
         </button>
