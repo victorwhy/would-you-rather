@@ -37,20 +37,12 @@ export async function createTopic({
       title: cleanTrailingQuestion(title),
       description,
       authorId: userId,
-    },
-  });
-
-  await prisma.choice.create({
-    data: {
-      body: cleanTrailingQuestion(choice1),
-      topicId: topic.id,
-    },
-  });
-
-  await prisma.choice.create({
-    data: {
-      body: cleanTrailingQuestion(choice2),
-      topicId: topic.id,
+      choices: {
+        create: [
+          { body: cleanTrailingQuestion(choice1) },
+          { body: cleanTrailingQuestion(choice2) }
+        ]
+      }
     },
   });
 

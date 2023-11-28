@@ -86,7 +86,7 @@ export default function TopicPage() {
       }
       <div className="choices-container flex flex-col md:flex-row w-full h-full text-2xl">
         <Form method="post" className="bg-black basis-1/2">
-          <input value={choice1.id} name="choiceId" hidden />
+          <input value={choice1.id} name="choiceId" hidden readOnly/>
           <button
             className="w-full h-full p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all"
             value={FormTypes.TOPIC_FORM}
@@ -98,7 +98,7 @@ export default function TopicPage() {
           </button>
         </Form>
         <Form method="post" className="bg-white basis-1/2">
-          <input value={choice2.id} name="choiceId" hidden />
+          <input value={choice2.id} name="choiceId" hidden readOnly />
           <button
             className="w-full h-full p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all"
             value={FormTypes.TOPIC_FORM}
