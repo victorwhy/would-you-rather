@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import {
   Form,
   isRouteErrorResponse,
+  MetaFunction,
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
@@ -88,6 +89,24 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   }
 };
 
+export const meta: MetaFunction<typeof loader> = ({
+  data,
+}) => {
+  const title = `Would you rather? ${data?.topic.title}`;
+  const description = `Would you rather ${data?.topic.choices[0].body} or ${data?.topic.choices[1].body}`
+  return [
+    { title },
+    {
+      property: "og:title",
+      content: title,
+    },
+    {
+      name: "description",
+      content: description,
+    },
+  ];
+};
+
 export default function TopicPage() {
   const data = useLoaderData<typeof loader>();
   const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
@@ -100,12 +119,7 @@ export default function TopicPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl text-center font-bold px-2 py-5">{data.topic.title}?</h1>
-      {
-        data.topic.description ? (
-          <p className="text-center px-3 pt-0 pb-5 max-w-lg mx-auto">{data.topic.description}</p>
-        ) : null
-      }
+      <h1 className="text-xl text-center font-bold p-2">{data.topic.title}?</h1>
       <div className="choices-container flex flex-col md:flex-row w-full h-full text-2xl">
         <Form method="post" className="bg-black basis-1/2">
           <input value={choice1.id} name="choiceId" hidden readOnly/>
@@ -132,6 +146,11 @@ export default function TopicPage() {
           </button>
         </Form>
       </div>
+      {
+        data.topic.description ? (
+          <p className="text-center px-3 pt-0 pb-5 max-w-lg mx-auto">{data.topic.description}</p>
+        ) : null
+      }
       <div className="p-3">
         <p>Comments</p>
         { data.user ? (

@@ -11,8 +11,8 @@ export default function NotesPage() {
 
   return (
     <div className="flex h-full min-h-screen flex-col">
-      <header className="flex items-center justify-between bg-black p-4 text-white">
-        <Link to="/topics" className="font-bold">
+      <header className="flex items-center justify-center bg-black p-4 text-white">
+        <Link to="/topics" className="anton text-4xl font-bold ml-auto pl-2">
           Would You Rather?
         </Link>
         <Menu
@@ -21,7 +21,7 @@ export default function NotesPage() {
           setClose={() => setIsOpen(false)}
         />
         <button
-          className="mxl-auto"
+          className="ml-auto"
           onClick={() => setIsOpen(!isOpen)}
         >
           <MenuIcon />

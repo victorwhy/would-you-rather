@@ -1,3 +1,14 @@
 .choices-container {
   height: calc(100vh - 180px);
 }
+
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/Anton-Regular.ttf')  format('truetype');
+}
+
+.anton {
+  font-family: "Anton";
+}
