@@ -7,7 +7,7 @@ export type { Topic } from "@prisma/client";
 
 export function getTopic(id: Topic["id"]) {
   return prisma.topic.findFirst({
-    select: { id: true, description: true, title: true, choices: true },
+    select: { id: true, description: true, title: true, choices: true, comments: true },
     where: { id },
   });
 }

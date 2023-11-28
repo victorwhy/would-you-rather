@@ -9,8 +9,9 @@ import {
 import invariant from "tiny-invariant";
 
 import { incrementChoice } from "~/models/choice.server";
+import { createComment } from "~/models/comment.server";
 import { getTopic } from "~/models/topic.server";
-import { addChoiceToSession, getChoicesFromSession } from "~/session.server";
+import { addChoiceToSession, getChoicesFromSession, getUser } from "~/session.server";
 import { calculatePercentage } from "~/utils";
 
 enum FormTypes {
@@ -21,12 +22,13 @@ enum FormTypes {
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
   const sessionChoices = await getChoicesFromSession(request);
+  const user = await getUser(request);
 
   const topic = await getTopic(params.topicId);
   if (!topic) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ topic, sessionChoices });
+  return json({ topic, sessionChoices, user });
 };
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
@@ -58,10 +60,30 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       );
     }
     case FormTypes.COMMENT_FORM: {
+      const user = await getUser(request);
       const commentBody = formData.get("commentBody");
-      console.log(commentBody);
 
-      return null;
+      if (user === null) {
+        return json(
+          { status: 400 },
+        );
+      };
+
+      if (typeof commentBody !== "string" || commentBody.length === 0) {
+        return json(
+          { status: 400 },
+        );
+      }
+
+      const comment = await createComment({
+        body: commentBody,
+        topicId: params.topicId,
+        authorId: user.id
+      })
+
+      return json(
+        { comment },
+      );
     }
   }
 };
@@ -110,24 +132,36 @@ export default function TopicPage() {
           </button>
         </Form>
       </div>
-      <Form
-        className="p-3"
-        method="post"
-      >
+      <div className="p-3">
         <p>Comments</p>
-        <textarea
-          className="block border-2 border-black px-3 text-sm w-full md:w-2/3 h-20 leading-loose"
-          name="commentBody"
-          placeholder="Reply"
-        />
-        <button
-          className="bg-black mt-3 px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
-          name="formName"
-          value={FormTypes.COMMENT_FORM}
-        >
-          Post
-        </button>
-      </Form>
+        { data.user ? (
+          <Form
+            method="post"
+          >
+            <textarea
+              className="block border-2 border-black px-3 text-sm w-full md:w-2/3 h-20 leading-loose"
+              name="commentBody"
+              placeholder="Reply"
+            />
+            <button
+              className="bg-black mt-3 px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
+              name="formName"
+              value={FormTypes.COMMENT_FORM}
+            >
+              Post
+            </button>
+          </Form>
+        ): null}
+        <div className={`${data.topic.comments.length ? "" : "hidden"}`}>
+          {
+            data.topic.comments.map((comment) => {
+              return (
+                <p key={comment.id}>{comment.body}</p>
+              )
+            })
+          }
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+import { cleanTrailingQuestion } from "~/utils";
+
+import { seedData } from "./topicSeed";
+
 const prisma = new PrismaClient();
 
 async function seed() {
@@ -24,27 +28,21 @@ async function seed() {
     },
   });
 
-  const topic = await prisma.topic.create({
-    data: {
-      title: "Regeneration or Healing",
-      description: "Regeneration allows you to perfectly heal only yourself of every wound, disease, missing limb, etc. which makes you immortal. Healing allows you to heal yourself and others of almost all wounds, but you can't regenerate your own or someone else's limbs, head, etc.",
-      authorId: user.id,
-    },
-  });
-
-  await prisma.choice.create({
-    data: {
-      body: "have Regeneration",
-      topicId: topic.id,
-    },
-  });
-
-  await prisma.choice.create({
-    data: {
-      body: "have Healing",
-      topicId: topic.id,
-    },
-  });
+  for (const { title, description, choice1, choice2 } of seedData) {
+    await prisma.topic.create({
+      data: {
+        title: cleanTrailingQuestion(title),
+        description,
+        authorId: user.id,
+        choices: {
+          create: [
+            { body: cleanTrailingQuestion(choice1) },
+            { body: cleanTrailingQuestion(choice2) }
+          ]
+        }
+      },
+    })
+  }
 
   console.log(`Database has been seeded. 🌱`);
 }

@@ -44,7 +44,7 @@ export default function Menu({ isOpen, user, setClose }: Menu) {
               New Topic
             </Link>
             <Link
-              to="login" className="block p-2 text-xl text-black"
+              to="/login" className="block p-2 text-xl text-black"
               onClick={setClose}
             >
               Log in

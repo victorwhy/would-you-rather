@@ -16,6 +16,7 @@ model User {
 
   password  Password?
   topics    Topic[]
+  comments  Comment[]
 }
 
 model Password {
@@ -56,6 +57,9 @@ model Comment {
   id        String @id @default(cuid())
   body      String
   votes     Int @default(0)
+  author    User   @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  authorId  String
+
   topic     Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   topicId   String
   
