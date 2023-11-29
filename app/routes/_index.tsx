@@ -38,7 +38,7 @@ export default function Index() {
               </div>
               <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
                 <Link
-                  to="/join"
+                  to="/topics/play"
                   className="flex items-center justify-center rounded-md border border-transparent bg-black px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-500 sm:px-8"
                 >
                   Play

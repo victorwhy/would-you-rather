@@ -1,7 +1,5 @@
 import type { Comment } from "@prisma/client"
-import {
-  Form, useFetcher
-} from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import { useState, useRef, useEffect } from "react";
 
 import { FormTypes } from "~/routes/topics.$topicId";

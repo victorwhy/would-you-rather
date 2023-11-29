@@ -6,8 +6,7 @@ import {
   MetaFunction,
   useFetcher,
   useLoaderData,
-  useRouteError,
-  useNavigation
+  useRouteError
 } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
