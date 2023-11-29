@@ -4,6 +4,7 @@ import {
   Form,
   isRouteErrorResponse,
   MetaFunction,
+  useFetcher,
   useLoaderData,
   useRouteError,
   useNavigation
@@ -116,8 +117,8 @@ export const meta: MetaFunction<typeof loader> = ({
 
 export default function TopicPage() {
   const data = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
   const formRef = useRef<HTMLFormElement>(null);
+  const fetcher = useFetcher();
   const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
   const choice1 = sortedChoices[0];
   const choice2 = sortedChoices[1];
@@ -127,8 +128,8 @@ export default function TopicPage() {
   const totalVotes = choice1.votes + choice2.votes;
   const topLevelComments = data.topic.comments.filter((comment) => comment.parentId === null);
   const nestedComments = data.topic.comments.filter((comment) => comment.parentId !== null);
-
-  const isAdding = navigation.state === "submitting";
+  
+  const isAdding = fetcher.state === "submitting";
 
   useEffect(() => {
     if (!isAdding) {
@@ -140,7 +141,11 @@ export default function TopicPage() {
     <div className="w-full">
       <h1 className="text-xl text-center font-bold p-2">{data.topic.title}?</h1>
       <div className="choices-container flex flex-col md:flex-row w-full h-full text-2xl">
-        <Form method="post" className="bg-black basis-1/2">
+        <Form
+          method="post"
+          className="bg-black basis-1/2"
+          preventScrollReset={true}
+        >
           <input value={choice1.id} name="choiceId" hidden readOnly/>
           <button
             className="w-full h-full p-5 hover:bg-gray-700 focus:bg-gray-700 transition-all"
@@ -152,7 +157,10 @@ export default function TopicPage() {
             <p className={`text-white ${hasSubmitted ? "" : " hidden"}`}>{calculatePercentage(choice1.votes, totalVotes)}</p>
           </button>
         </Form>
-        <Form method="post" className="bg-white basis-1/2">
+        <Form
+          method="post" className="bg-white basis-1/2"
+          preventScrollReset={true}
+        >
           <input value={choice2.id} name="choiceId" hidden readOnly />
           <button
             className="w-full h-full p-5 hover:bg-gray-100 focus:bg-gray-100 transition-all"
@@ -171,9 +179,9 @@ export default function TopicPage() {
         ) : null
       }
       <div className="p-3">
-        <p>Comments</p>
+        <p>Comments {data.topic.comments.length}</p>
         { data.user ? (
-          <Form
+          <fetcher.Form
             method="post"
             ref={formRef}
             preventScrollReset={true}
@@ -190,7 +198,7 @@ export default function TopicPage() {
             >
               Post
             </button>
-          </Form>
+          </fetcher.Form>
         ): null}
         <div className={`relative ${data.topic.comments.length ? "" : "hidden"}`}>
           {

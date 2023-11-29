@@ -1,6 +1,6 @@
 import type { Comment } from "@prisma/client"
 import {
-  Form
+  Form, useFetcher
 } from "@remix-run/react";
 import { useState, useRef, useEffect } from "react";
 
@@ -14,14 +14,16 @@ interface CommentProps {
   isAdding: boolean;
 }
 
-export default function Comment({ comment, commentList, level, canReply, isAdding }: CommentProps) {
+export default function Comment({ comment, commentList, level, canReply }: CommentProps) {
   const [replyOpen, setReplyOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null);
+  const fetcher = useFetcher();
+  const isAdding = fetcher.state === "submitting";
 
   useEffect(() => {
     if (!isAdding) {
       setReplyOpen(false);
-      formRef.current?.clear();
+      formRef.current?.reset();
     }
   }, [isAdding])
 
@@ -43,7 +45,7 @@ export default function Comment({ comment, commentList, level, canReply, isAddin
       </div>
       {
         canReply && replyOpen ? (
-          <Form
+          <fetcher.Form
             method="post"
             className="w-full max-w-xl"
             ref={formRef}
@@ -67,7 +69,7 @@ export default function Comment({ comment, commentList, level, canReply, isAddin
             >
               Post
             </button>
-          </Form>
+          </fetcher.Form>
         ) : null
       }
       {
