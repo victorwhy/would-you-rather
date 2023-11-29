@@ -9,13 +9,16 @@ import {
 } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
+import CommentComponent from "~/components/Comment";
 import { incrementChoice } from "~/models/choice.server";
+import type { Comment } from "~/models/comment.server";
 import { createComment } from "~/models/comment.server";
 import { getTopic } from "~/models/topic.server";
 import { addChoiceToSession, getChoicesFromSession, getUser } from "~/session.server";
 import { calculatePercentage } from "~/utils";
 
-enum FormTypes {
+
+export enum FormTypes {
   TOPIC_FORM = "choice",
   COMMENT_FORM = "comment"
 }
@@ -63,6 +66,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
     case FormTypes.COMMENT_FORM: {
       const user = await getUser(request);
       const commentBody = formData.get("commentBody");
+      const parentCommentId = formData.get("parentCommentId") as string | null;
 
       if (user === null) {
         return json(
@@ -79,7 +83,8 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       const comment = await createComment({
         body: commentBody,
         topicId: params.topicId,
-        authorId: user.id
+        authorId: user.id,
+        parentId: parentCommentId
       })
 
       return json(
@@ -116,6 +121,8 @@ export default function TopicPage() {
   const choice2Picked = data.sessionChoices.includes(choice2.id)
   const hasSubmitted = choice1Picked || choice2Picked;
   const totalVotes = choice1.votes + choice2.votes;
+  const topLevelComments = data.topic.comments.filter((comment) => comment.parentId === null);
+  const nestedComments = data.topic.comments.filter((comment) => comment.parentId !== null);
 
   return (
     <div className="w-full">
@@ -171,11 +178,17 @@ export default function TopicPage() {
             </button>
           </Form>
         ): null}
-        <div className={`${data.topic.comments.length ? "" : "hidden"}`}>
+        <div className={`relative ${data.topic.comments.length ? "" : "hidden"}`}>
           {
-            data.topic.comments.map((comment) => {
+            topLevelComments.map((comment) => {
               return (
-                <p key={comment.id}>{comment.body}</p>
+                <CommentComponent
+                  key={comment.id}
+                  comment={comment as unknown as Comment}
+                  commentList={nestedComments as unknown as Comment[]}
+                  canReply={!!data.user}
+                  level={1}
+                />
               )
             })
           }
