@@ -2,7 +2,7 @@ import type { Comment } from "@prisma/client"
 import {
   Form
 } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import { FormTypes } from "~/routes/topics.$topicId";
 
@@ -11,10 +11,19 @@ interface CommentProps {
   commentList: Comment[];
   level: number;
   canReply: boolean;
+  isAdding: boolean;
 }
 
-export default function Comment({ comment, commentList, level, canReply }: CommentProps) {
+export default function Comment({ comment, commentList, level, canReply, isAdding }: CommentProps) {
   const [replyOpen, setReplyOpen] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!isAdding) {
+      setReplyOpen(false);
+      formRef.current?.clear();
+    }
+  }, [isAdding])
 
   const childComments = commentList.filter((childComment) => comment.id === childComment.parentId);
   const nestedComments = commentList.filter((childComment) => comment.id !== childComment.parentId);
@@ -37,6 +46,8 @@ export default function Comment({ comment, commentList, level, canReply }: Comme
           <Form
             method="post"
             className="w-full max-w-xl"
+            ref={formRef}
+            preventScrollReset={true}
           >
             <input
               name="parentCommentId"
@@ -68,6 +79,7 @@ export default function Comment({ comment, commentList, level, canReply }: Comme
               commentList={nestedComments}
               level={level + 1}
               canReply={canReply}
+              isAdding={isAdding}
             />
           )
         })

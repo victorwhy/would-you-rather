@@ -6,7 +6,9 @@ import {
   MetaFunction,
   useLoaderData,
   useRouteError,
+  useNavigation
 } from "@remix-run/react";
+import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
 
 import CommentComponent from "~/components/Comment";
@@ -114,6 +116,8 @@ export const meta: MetaFunction<typeof loader> = ({
 
 export default function TopicPage() {
   const data = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const formRef = useRef<HTMLFormElement>(null);
   const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
   const choice1 = sortedChoices[0];
   const choice2 = sortedChoices[1];
@@ -123,6 +127,14 @@ export default function TopicPage() {
   const totalVotes = choice1.votes + choice2.votes;
   const topLevelComments = data.topic.comments.filter((comment) => comment.parentId === null);
   const nestedComments = data.topic.comments.filter((comment) => comment.parentId !== null);
+
+  const isAdding = navigation.state === "submitting";
+
+  useEffect(() => {
+    if (!isAdding) {
+      formRef.current?.reset();
+    }
+  }, [isAdding])
 
   return (
     <div className="w-full">
@@ -163,6 +175,8 @@ export default function TopicPage() {
         { data.user ? (
           <Form
             method="post"
+            ref={formRef}
+            preventScrollReset={true}
           >
             <textarea
               className="block border-2 border-black px-3 text-sm w-full md:w-2/3 h-20 leading-loose"
@@ -188,6 +202,7 @@ export default function TopicPage() {
                   commentList={nestedComments as unknown as Comment[]}
                   canReply={!!data.user}
                   level={1}
+                  isAdding={isAdding}
                 />
               )
             })
