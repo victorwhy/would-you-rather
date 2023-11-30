@@ -4,7 +4,7 @@ import { prisma } from "~/db.server";
 
 export type { Choice } from "@prisma/client";
 
-export function getChoice(id: Choice["id"]) {
+export async function getChoice(id: Choice["id"]) {
   return prisma.choice.findFirst({
     select: { id: true, votes: true, body: true },
     where: { id },
