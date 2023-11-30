@@ -19,6 +19,17 @@ export function getTopics() {
   });
 }
 
+export function getTopicsVotes() {
+  const result = prisma.$queryRaw`
+    SELECT "Topic".id, SUM("Choice".votes) as topic_votes
+    FROM "Topic"
+    JOIN "Choice" ON "Topic".id = "Choice"."topicId"
+    GROUP BY "Topic"."id"
+    ORDER BY topic_votes DESC
+  `;
+  return result;
+}
+
 export async function createTopic({
   title,
   description,

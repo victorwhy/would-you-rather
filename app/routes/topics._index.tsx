@@ -1,8 +1,8 @@
-import type { Choice } from "@prisma/client";
+import type { Choice, Topic } from "@prisma/client";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
-import { getTopics } from "~/models/topic.server";
+import { getTopics, getTopicsVotes } from "~/models/topic.server";
 import { calculatePercentage } from "~/utils";
 
 interface TopicItem {
@@ -14,7 +14,10 @@ interface TopicItem {
 
 export const loader = async () => {
   const topics = await getTopics();
-  return json({ topics });
+  const topicVotes = await getTopicsVotes() as {id: string, topic_votes: number}[];
+  const topicsSorted = topicVotes.map(({id}:{id: string}) => id);
+  console.log(topicVotes);
+  return json({ topics, topicsSorted });
 };
 
 const TopicItem = ({ id, title, choices, index }: TopicItem) => {
@@ -58,16 +61,21 @@ export default function TopicIndexPage() {
   return (
     <div className="w-full">
       <ol>
-        {data.topics.map((topic, index) => (
-          <li key={topic.id}>
-            <TopicItem
-              id={topic.id}
-              title={topic.title}
-              choices={topic.choices as unknown as Choice[]}
-              index={index + 1}
-            />
-          </li>
-        ))}
+        {data.topicsSorted.map((topicId, index) => {
+          const topicData = data.topics.find(({id}) => id === topicId);
+          if (!topicData) return null;
+
+          return (
+            <li key={topicData.id}>
+              <TopicItem
+                id={topicData.id}
+                title={topicData.title}
+                choices={topicData.choices as unknown as Choice[]}
+                index={index + 1}
+              />
+            </li>
+          )
+        })}
       </ol>
     </div>
   );
