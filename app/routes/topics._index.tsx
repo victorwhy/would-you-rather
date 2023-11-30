@@ -1,14 +1,9 @@
+import type { Choice } from "@prisma/client";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
 import { getTopics } from "~/models/topic.server";
 import { calculatePercentage } from "~/utils";
-
-interface Choice {
-  id: number;
-  body: string;
-  votes: number;
-}
 
 interface TopicItem {
   id: string;
@@ -68,7 +63,7 @@ export default function TopicIndexPage() {
             <TopicItem
               id={topic.id}
               title={topic.title}
-              choices={topic.choices}
+              choices={topic.choices as unknown as Choice[]}
               index={index + 1}
             />
           </li>
