@@ -1,4 +1,4 @@
-import type { Choice, Topic } from "@prisma/client";
+import type { Choice } from "@prisma/client";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
@@ -14,10 +14,9 @@ interface TopicItem {
 
 export const loader = async () => {
   const topics = await getTopics();
-  const topicVotes = await getTopicsVotes() as {id: string, topic_votes: number}[];
-  const topicsSorted = topicVotes.map(({id}:{id: string}) => id);
-  console.log(topicVotes);
-  return json({ topics, topicsSorted });
+  const topicVotes = await getTopicsVotes();
+  const topicIdsSorted = topicVotes.map(({id}) => id);
+  return json({ topics, topicIdsSorted });
 };
 
 const TopicItem = ({ id, title, choices, index }: TopicItem) => {
@@ -61,7 +60,7 @@ export default function TopicIndexPage() {
   return (
     <div className="w-full">
       <ol>
-        {data.topicsSorted.map((topicId, index) => {
+        {data.topicIdsSorted.map((topicId, index) => {
           const topicData = data.topics.find(({id}) => id === topicId);
           if (!topicData) return null;
 

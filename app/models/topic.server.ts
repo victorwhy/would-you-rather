@@ -19,13 +19,13 @@ export function getTopics() {
   });
 }
 
-export function getTopicsVotes() {
-  const result = prisma.$queryRaw`
-    SELECT "Topic".id, SUM("Choice".votes) as topic_votes
+export async function getTopicsVotes() {
+  const result = await prisma.$queryRaw<({id: Topic["id"]} & {topicVotes: bigint} )[]>`
+    SELECT "Topic".id, SUM("Choice".votes) as topicVotes
     FROM "Topic"
     JOIN "Choice" ON "Topic".id = "Choice"."topicId"
     GROUP BY "Topic"."id"
-    ORDER BY topic_votes DESC
+    ORDER BY topicVotes DESC
   `;
   return result;
 }
