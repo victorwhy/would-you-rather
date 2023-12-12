@@ -17,6 +17,7 @@ model User {
   password  Password?
   topics    Topic[]
   comments  Comment[]
+  votes     Vote[]
 }
 
 model Password {
@@ -38,6 +39,7 @@ model Topic {
 
   choices Choice[]
   comments Comment[]
+  votes    Vote[]
 }
 
 model Choice {
@@ -56,7 +58,7 @@ model Choice {
 model Comment {
   id        String @id @default(cuid())
   body      String
-  votes     Int @default(0)
+
   author    User   @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   authorId  String
 
@@ -71,6 +73,29 @@ model Comment {
   parent    Comment? @relation("Comment_children", fields: [parentId], references: [id])
   parentId  String?
 
+  votes     Vote[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum VoteDirection {
+  UP
+  DOWN
+  UNVOTE
+}
+
+model Vote {
+  id        String @id @default(cuid())
+  
+  voter    User   @relation(fields: [voterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  voterId  String
+
+  comment    Comment?   @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  commentId  String?
+
+  topic    Topic?   @relation(fields: [topicId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  topicId  String?
+
+  direction VoteDirection @default(UNVOTE) 
 }

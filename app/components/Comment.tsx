@@ -3,6 +3,7 @@ import { useFetcher } from "@remix-run/react";
 import { useState, useRef, useEffect } from "react";
 
 import { FormTypes } from "~/routes/topics.$topicId";
+import { action as topicActionType } from "~/routes/topics.$topicId";
 
 interface CommentProps {
   comment: Comment;
@@ -15,15 +16,18 @@ interface CommentProps {
 export default function Comment({ comment, commentList, level, canReply }: CommentProps) {
   const [replyOpen, setReplyOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null);
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof topicActionType>();
   const isAdding = fetcher.state === "submitting";
+  const commentError = fetcher.data?.errors?.comment;
 
   useEffect(() => {
-    if (!isAdding) {
+    if (!isAdding && !commentError) {
       setReplyOpen(false);
       formRef.current?.reset();
     }
-  }, [isAdding])
+  }, [isAdding, commentError])
+
+  console.log(comment);
 
   const childComments = commentList.filter((childComment) => comment.id === childComment.parentId);
   const nestedComments = commentList.filter((childComment) => comment.id !== childComment.parentId);
@@ -32,10 +36,10 @@ export default function Comment({ comment, commentList, level, canReply }: Comme
       className="relative"
       style={{ paddingLeft: `${level / 2}rem`}}
     >
-      <div className="flex flex-row w-full max-w-xl">
+      <div className="flex flex-col w-full max-w-xl items-baseline">
         <p>{comment.body}</p>
         <button
-          className="pl-2"
+          className=""
           onClick={() => setReplyOpen(!replyOpen)}
         >
           Reply
@@ -56,10 +60,13 @@ export default function Comment({ comment, commentList, level, canReply }: Comme
               readOnly
             />
             <textarea
-              className="block border-2 border-black px-3 text-sm w-full h-20 leading-loose"
+              className="block border-2 border-black p-2 text-sm w-full h-20 leading-normal"
               name="commentBody"
               placeholder="Reply"
             />
+            {commentError ? (
+              <em className="block text-red-600">{commentError}</em>
+            ) : null}
             <button
               className="bg-black mt-3 px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
               name="formName"

@@ -25,6 +25,12 @@ export enum FormTypes {
   COMMENT_FORM = "comment"
 }
 
+interface error {
+  choice?: string;
+  user?: string;
+  comment?: string;
+}
+
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.topicId, "topicId not found");
   const sessionChoices = await getChoicesFromSession(request);
@@ -43,12 +49,16 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const formName = formData.get("formName");
 
+  const errors: error = {};
+
   switch (formName) {
     case FormTypes.TOPIC_FORM: {
       const choiceId = formData.get("choiceId");
 
       if (typeof choiceId !== "string" || choiceId.length === 0) {
+        errors.choice = "No ChoiceId"
         return json(
+          { errors },
           { status: 400 },
         );
       }
@@ -57,7 +67,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       const cookie = await addChoiceToSession(request, parseInt(choiceId));
 
       return json(
-        { choice },
+        { errors, choice },
         {
           headers: {
             "Set-Cookie": cookie,
@@ -71,13 +81,18 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       const parentCommentId = formData.get("parentCommentId") as string | null;
 
       if (user === null) {
+        errors.user = "No User";
+
         return json(
+          { errors },
           { status: 400 },
         );
       };
 
       if (typeof commentBody !== "string" || commentBody.length === 0) {
+        errors.comment = "Can't post an empty comment";
         return json(
+          { errors },
           { status: 400 },
         );
       }
@@ -90,9 +105,11 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
       })
 
       return json(
-        { comment },
+        { errors, comment },
       );
     }
+    default: 
+      return json(null);
   }
 };
 
@@ -117,7 +134,7 @@ export const meta: MetaFunction<typeof loader> = ({
 export default function TopicPage() {
   const data = useLoaderData<typeof loader>();
   const formRef = useRef<HTMLFormElement>(null);
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof action>();
   const sortedChoices = data.topic.choices.sort((a, b) => a.id - b.id);
   const choice1 = sortedChoices[0];
   const choice2 = sortedChoices[1];
@@ -129,6 +146,9 @@ export default function TopicPage() {
   const nestedComments = data.topic.comments.filter((comment) => comment.parentId !== null);
   
   const isAdding = fetcher.state === "submitting";
+
+  const commentError = fetcher.data?.errors?.comment;
+  console.log(commentError);
 
   useEffect(() => {
     if (!isAdding) {
@@ -186,10 +206,13 @@ export default function TopicPage() {
             preventScrollReset={true}
           >
             <textarea
-              className="block border-2 border-black px-3 text-sm w-full md:w-2/3 h-20 leading-loose"
+              className="block border-2 border-black p-2 text-sm w-full md:w-2/3 h-20 leading-normal"
               name="commentBody"
               placeholder="Reply"
             />
+            {commentError ? (
+              <em className="block text-red-600">{commentError}</em>
+            ) : null}
             <button
               className="bg-black mt-3 px-4 py-2 text-white hover:bg-gray-600 focus:bg-gray-400 transition-all"
               name="formName"
